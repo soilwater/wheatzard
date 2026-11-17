@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wheatzard</title>
+<link rel="stylesheet" href="style.css">
+<script src="vendor/plotly-2.35.2.min.js"></script>
+</head>
+<body>
+<aside class="sidebar">
+  <a class="brand" href="#">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 29V9" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+      <g fill="currentColor"><ellipse cx="12.4" cy="11" rx="2.6" ry="4.4" transform="rotate(-28 12.4 11)"/><ellipse cx="19.6" cy="11" rx="2.6" ry="4.4" transform="rotate(28 19.6 11)"/>
+      <ellipse cx="12.4" cy="18" rx="2.6" ry="4.4" transform="rotate(-28 12.4 18)"/><ellipse cx="19.6" cy="18" rx="2.6" ry="4.4" transform="rotate(28 19.6 18)"/>
+      <ellipse cx="16" cy="5.2" rx="2.2" ry="3.8"/></g></svg>
+    <span><b>Wheatzard</b><small>Kansas wheat climate atlas</small></span>
+  </a>
+  <nav id="nav"></nav>
+  <div class="sidebar-foot" id="period"></div>
+</aside>
+<main id="app"></main>
+<script type="module">
+import { core } from './js/core.js';
+import apps from './apps/index.js';
+
+const host = document.getElementById('app'), nav = document.getElementById('nav');
+const state = { tile: null, county: null };         // shared between pages
+
+for (const group of new Set(apps.map(a => a.group))) {
+  nav.append(Object.assign(document.createElement('div'), { className: 'nav-group', textContent: group }),
+    ...apps.filter(a => a.group === group).map(a => Object.assign(document.createElement('a'),
+      { href: '#' + a.id, textContent: a.title, title: a.about })));
+}
+
+async function open() {
+  const app = apps.find(a => a.id === location.hash.slice(1)) ?? apps[0];
+  for (const link of nav.querySelectorAll('a')) link.classList.toggle('on', link.hash === '#' + app.id);
+  document.title = `${app.title} · Wheatzard`;
+  const page = document.createElement('div');
+  page.className = 'page';
+  host.replaceChildren(page);
+  scrollTo(0, 0);
+  try {
+    await app.mount(page, { core, state });
+  } catch (err) {
+    page.textContent = 'Could not load this page: ' + err.message;
+    console.error(err);
+  }
+}
+
+await core.init();
+const p = core.manifest.period;
+document.getElementById('period').textContent = `${core.manifest.tiles.count} tiles · ${core.manifest.counties.count} counties · record ${p.start.slice(0, 4)} to ${p.end.slice(0, 4)}`;
+addEventListener('hashchange', open);
+open();
+</script>
+</body>
+</html>

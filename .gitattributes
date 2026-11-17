@@ -1,0 +1,4 @@
+# Data files are binary: never convert line endings
+*.bin binary
+*.zip binary
+*.png binary

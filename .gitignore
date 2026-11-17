@@ -1,0 +1,11 @@
+# Kept on the local computer only: the scripts that build the dataset and their inputs
+/data/
+/scripts/
+/raw_data/
+
+__pycache__/
+.ipynb_checkpoints/
+
+# Local assistant and editor files
+.claude/
+.vscode/
